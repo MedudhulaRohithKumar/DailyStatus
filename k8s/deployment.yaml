@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: daily-status-deployment
+  labels:
+    app: daily-status
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: daily-status
+  template:
+    metadata:
+      labels:
+        app: daily-status
+    spec:
+      containers:
+      - name: daily-status-container
+        image: $IMAGE_URI # Set dynamically by CodeBuild/sed
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: host
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: username
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: database
+        - name: PGPORT
+          value: "5432"
+        - name: PORT
+          value: "3000"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt_secret
