@@ -1,5 +1,7 @@
 version: 0.2
-
+env:
+  variable:
+    REPOSITORY_URI:"384722508819.dkr.ecr.ap-south-2.amazonaws.com/daily-status"
 phases:
   install:
     commands:
@@ -9,7 +11,6 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI=384722508819.dkr.ecr.ap-south-2.amazonaws.com/daily-status
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
