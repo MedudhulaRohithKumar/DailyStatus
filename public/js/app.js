@@ -14,6 +14,7 @@ if (!token && !isLoginPage) {
 }
 
 // --- Login Page Logic ---
+if (isLoginPage) {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const resetForm = document.getElementById('reset-form');
