@@ -230,7 +230,7 @@ if (!isLoginPage) {
             renderTable(statuses);
 
             // Check if current user already submitted a status today and update modal
-            const myStatus = statuses.find(s => s.user_id === currentUser.id);
+            const myStatus = statuses.find(s => String(s.user_id) === String(currentUser.id));
             if (myStatus && myStatus.status_type !== 'Not Updated') {
                 statusType.value = myStatus.status_type;
                 statusDesc.value = myStatus.description;
