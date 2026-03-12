@@ -33,7 +33,11 @@ if (dbType === 'sqlite') {
   };
 } else {
   // Use Postgres
-  const pool = new Pool({});
+  const pool = new Pool({
+    ssl: {
+      rejectUnauthorized: false  // Required for AWS RDS
+    }
+  });
   db = {
     query: (text, params) => pool.query(text, params),
     pool
