@@ -476,3 +476,25 @@ body {
 .modal-actions .btn-primary {
   width: auto;
 }
+
+.auth-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+.auth-links a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-links a:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none !important;
+}

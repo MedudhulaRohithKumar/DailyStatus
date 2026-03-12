@@ -41,4 +41,63 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/register', async (req, res) => {
+    try {
+        const { full_name, username, password } = req.body;
+
+        if (!full_name || !username || !password) {
+            return res.status(400).json({ error: 'Full name, username, and password are required' });
+        }
+
+        // Check if user exists
+        const userExists = await db.query('SELECT username FROM users WHERE username = $1', [username]);
+        if (userExists.rows.length > 0) {
+            return res.status(400).json({ error: 'Username already exists' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        // Insert new user
+        await db.query(
+            'INSERT INTO users (full_name, username, password_hash, role) VALUES ($1, $2, $3, $4)',
+            [full_name, username, password_hash, 'user']
+        );
+
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).json({ error: 'Server error during registration' });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { username, new_password } = req.body;
+
+        if (!username || !new_password) {
+            return res.status(400).json({ error: 'Username and new password are required' });
+        }
+
+        // Check if user exists
+        const userExists = await db.query('SELECT id FROM users WHERE username = $1', [username]);
+        if (userExists.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(new_password, salt);
+
+        // Update password
+        await db.query('UPDATE users SET password_hash = $1 WHERE username = $2', [password_hash, username]);
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (err) {
+        console.error('Reset password error:', err);
+        res.status(500).json({ error: 'Server error during password reset' });
+    }
+});
+
 module.exports = router;

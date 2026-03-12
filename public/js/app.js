@@ -14,10 +14,58 @@ if (!token && !isLoginPage) {
 }
 
 // --- Login Page Logic ---
-if (isLoginPage) {
     const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const resetForm = document.getElementById('reset-form');
+
     const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    const registerSuccess = document.getElementById('register-success');
+    const resetError = document.getElementById('reset-error');
+    const resetSuccess = document.getElementById('reset-success');
+
     const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // Toggles
+    const showRegisterLink = document.getElementById('show-register');
+    const showResetLink = document.getElementById('show-reset');
+    const showLoginFromRegLink = document.getElementById('show-login-from-reg');
+    const showLoginFromResetLink = document.getElementById('show-login-from-reset');
+
+    const hideAllAuthForms = () => {
+        loginForm.classList.add('hidden');
+        registerForm.classList.add('hidden');
+        resetForm.classList.add('hidden');
+        // clear messages
+        loginError.textContent = '';
+        registerError.textContent = '';
+        registerSuccess.textContent = '';
+        resetError.textContent = '';
+        resetSuccess.textContent = '';
+    };
+
+    showRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllAuthForms();
+        registerForm.classList.remove('hidden');
+    });
+
+    showResetLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideAllAuthForms();
+        resetForm.classList.remove('hidden');
+    });
+
+    const showLogin = (e) => {
+        if (e) e.preventDefault();
+        hideAllAuthForms();
+        loginForm.classList.remove('hidden');
+    };
+
+    showLoginFromRegLink.addEventListener('click', showLogin);
+    showLoginFromResetLink.addEventListener('click', showLogin);
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -48,6 +96,84 @@ if (isLoginPage) {
             loginError.textContent = err.message;
             loginBtn.innerHTML = '<span>Sign In</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
             loginBtn.disabled = false;
+        }
+    });
+
+    // Register Submit
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const full_name = document.getElementById('reg-fullname').value;
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        registerBtn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;margin:auto"></div>';
+        registerBtn.disabled = true;
+        registerError.textContent = '';
+        registerSuccess.textContent = '';
+
+        try {
+            const res = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full_name, username, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Registration failed');
+            }
+
+            registerSuccess.textContent = 'Account created successfully! You can now log in.';
+            document.getElementById('reg-fullname').value = '';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            
+            setTimeout(() => { showLogin(); }, 2000);
+
+        } catch (err) {
+            registerError.textContent = err.message;
+        } finally {
+            registerBtn.innerHTML = '<span>Register</span>';
+            registerBtn.disabled = false;
+        }
+    });
+
+    // Reset Password Submit
+    resetForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('reset-username').value;
+        const new_password = document.getElementById('reset-password').value;
+
+        resetBtn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;margin:auto"></div>';
+        resetBtn.disabled = true;
+        resetError.textContent = '';
+        resetSuccess.textContent = '';
+
+        try {
+            const res = await fetch(`${API_URL}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, new_password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Password reset failed');
+            }
+
+            resetSuccess.textContent = 'Password reset successfully! You can now log in.';
+            document.getElementById('reset-username').value = '';
+            document.getElementById('reset-password').value = '';
+
+            setTimeout(() => { showLogin(); }, 2000);
+            
+        } catch (err) {
+            resetError.textContent = err.message;
+        } finally {
+            resetBtn.innerHTML = '<span>Reset Password</span>';
+            resetBtn.disabled = false;
         }
     });
 }
